@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 
-const connection = async ()=>{
-    return await mongoose.connect("mongodb+srv://ziad:00241300@cluster0.bxnbg.mongodb.net/instagram")
-    .then(()=> console.log(`connected on ...... `))
-    .catch(err=>console.log(`fail to connect `))
-}
+const connection = () => {
+  mongoose.set("bufferCommands", false);
+
+  return mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 30000,
+  });
+};
 
 export default connection;

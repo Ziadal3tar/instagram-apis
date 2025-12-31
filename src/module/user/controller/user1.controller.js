@@ -309,12 +309,16 @@ export const getPostsBasedOnSocialNetwork = asyncHandler(async (req, res, next) 
     postModel.find({ createdBy: { $in: feedUsers } })
       .select('caption postsImgAndVideos createdBy comments likes createdAt url public_id') // اختصر الحقول
       .populate({
-        path: "createdBy",
-        select: "userName profilePic", // لا تملأ كل الحقول الثقيلة
-      })
+  path: "createdBy",
+  select: "userName profilePic following followers reels",
+  populate: {
+    path: "posts",
+    select: "postsImgAndVideos"
+  }
+})
       .populate({
         path: "comments",
-        populate: { path: "userId", select: "userName profilePic" }
+        populate: { path: "userId", select: "userName profilePic fullName" }
       })
       .sort({ createdAt: -1 })
       .limit(fetchCountPerSource)
@@ -323,9 +327,13 @@ export const getPostsBasedOnSocialNetwork = asyncHandler(async (req, res, next) 
     reelModel.find({ createdBy: { $in: feedUsers } })
       .select('caption url public_id createdBy comments likes createdAt') // اختصر الحقول
       .populate({
-        path: "createdBy",
-        select: "userName profilePic",
-      })
+  path: "createdBy",
+  select: "userName profilePic following followers reels",
+  populate: {
+    path: "posts",
+    select: "postsImgAndVideos"
+  }
+})
       .populate({
         path: "comments",
         populate: { path: "userId", select: "userName profilePic" }

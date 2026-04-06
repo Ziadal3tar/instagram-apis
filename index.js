@@ -22,7 +22,7 @@ const app = express();
    DB
 ======================= */
 import connection from "./DB/connection.js";
-mongoose.set("bufferCommands", false);
+// mongoose.set("bufferCommands", false);
 
 /* =======================
    GRAPHQL

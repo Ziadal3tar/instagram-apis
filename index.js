@@ -1,3 +1,4 @@
+
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
@@ -88,82 +89,86 @@ app.get("/", (req, res) => res.send("API is running 🚀"));
 app.use(globalError);
 
 /* =======================
-   START SERVER AFTER DB
+   START SERVER (IMPORTANT)
 ======================= */
 const PORT = process.env.PORT || 3000;
 
+// شغّل السيرفر الأول
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+/* =======================
+   SOCKET.IO
+======================= */
+const io = socketIO.init(server);
+
+io.on("connection", (socket) => {
+  console.log("🟢 Socket connected:", socket.id);
+
+  socket.on("updateSocketId", async (userToken) => {
+    try {
+      const decoded = jwt.verify(userToken, process.env.tokenSignature);
+      if (!decoded?.id) return;
+
+      await userModel.findByIdAndUpdate(decoded.id, {
+        socketID: socket.id,
+      });
+    } catch (err) {
+      console.error("updateSocketId error:", err);
+    }
+  });
+
+  socket.on("notification", async (data) => {
+    try {
+      if (!data?.eventName || !data?.to) return;
+
+      const actor = await userModel
+        .findById(data.data)
+        .select("userName _id")
+        .lean();
+
+      if (!actor) return;
+
+      const text = `${actor.userName} ${notification[data.eventName]}`;
+
+      const notificationData = {
+        text,
+        data: actor._id,
+        type: data.type || data.eventName,
+        createdAt: new Date(),
+      };
+
+      const pushed = await userModel.findByIdAndUpdate(
+        data.to,
+        { $push: { notifications: notificationData } },
+        { new: true, select: "socketID notifications" }
+      ).lean();
+
+      if (pushed?.socketID) {
+        io.to(pushed.socketID).emit("notification", {
+          message: "New notification",
+          payload: notificationData,
+        });
+      }
+    } catch (err) {
+      console.error("notification error:", err);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Socket disconnected:", socket.id);
+  });
+});
+
+/* =======================
+   CONNECT DB (بعد السيرفر)
+======================= */
 connection()
   .then(() => {
     console.log("✅ MongoDB connected");
-
-    const server = app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-
-    /* =======================
-       SOCKET.IO
-    ======================= */
-    const io = socketIO.init(server);
-
-    io.on("connection", (socket) => {
-      console.log("🟢 Socket connected:", socket.id);
-
-      socket.on("updateSocketId", async (userToken) => {
-        try {
-          const decoded = jwt.verify(userToken, process.env.tokenSignature);
-          if (!decoded?.id) return;
-
-          await userModel.findByIdAndUpdate(decoded.id, {
-            socketID: socket.id,
-          });
-        } catch (err) {
-          console.error("updateSocketId error:", err);
-        }
-      });
-
-      socket.on("notification", async (data) => {
-        try {
-          if (!data?.eventName || !data?.to) return;
-
-          const actor = await userModel
-            .findById(data.data)
-            .select("userName _id")
-            .lean();
-
-          if (!actor) return;
-
-          const text = `${actor.userName} ${notification[data.eventName]}`;
-
-          const notificationData = {
-            text,
-            data: actor._id,
-            type: data.type || data.eventName,
-            createdAt: new Date(),
-          };
-
-          const pushed = await userModel.findByIdAndUpdate(
-            data.to,
-            { $push: { notifications: notificationData } },
-            { new: true, select: "socketID notifications" }
-          ).lean();
-
-          if (pushed?.socketID) {
-            io.to(pushed.socketID).emit("notification", {
-              message: "New notification",
-              payload: notificationData,
-            });
-          }
-        } catch (err) {
-          console.error("notification error:", err);
-        }
-      });
-
-      socket.on("disconnect", () => {
-        console.log("🔴 Socket disconnected:", socket.id);
-      });
-    });
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err.message);
-    process.exit(1);
+    console.error("❌ MongoDB connection failed:", err);
   });
+

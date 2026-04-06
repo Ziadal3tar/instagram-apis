@@ -142,7 +142,7 @@ const randomVideo = () => sample(shortVideos);
 // ---------------- MAIN FLOW ----------------
 const runSeed = async () => {
   try {
-    const MONGO_URI = process.env.DBURL || "mongodb+srv://ziad:00241300@cluster0.bxnbg.mongodb.net/instagram";
+    const MONGO_URI = process.env.DBURL || "mongodb+srv://ZiadAlmorsy:Zz%4000241300@cluster0.mjwgrkh.mongodb.net/instagram";
     console.log("Using MONGO_URI =", MONGO_URI);
     await mongoose.connect(MONGO_URI);
     console.log("Connected to MongoDB");

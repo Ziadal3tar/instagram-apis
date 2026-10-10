@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
+import dns from "dns";
 
+dns.setServers([
+  process.env.DNS_PRIMARY || "8.8.8.8",
+  process.env.DNS_SECONDARY || "8.8.4.4",
+]);
 // const connection = () => {
 //   // mongoose.set("bufferCommands", false);
 

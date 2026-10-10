@@ -1,5 +1,10 @@
-
-node_modules
-
-/node_modules
-/seed.js
+node_modules/
+.env
+.env.*
+!.env.example
+config/.env
+uploads/
+coverage/
+logs/
+*.log
+.DS_Store

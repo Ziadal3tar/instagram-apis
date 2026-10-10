@@ -46,16 +46,16 @@ const userSchema = new Schema({
 
   likes: [{ type: Types.ObjectId, refPath: 'itemModel' }],
   stories: [{ type: Types.ObjectId, ref: "Story" }],
-  posts: [{ type: Types.ObjectId, ref: "Post" }],
-  following: [{ type: Types.ObjectId, ref: "User" }],
-  followers: [{ type: Types.ObjectId, ref: "User" }],
-  visited: [{ type: Types.ObjectId, ref: "User" }],
+  // posts: [{ type: Types.ObjectId, ref: "Post" }],
+  // following: [{ type: Types.ObjectId, ref: "User" }],
+  // followers: [{ type: Types.ObjectId, ref: "User" }],
+  // visited: [{ type: Types.ObjectId, ref: "User" }],
   reels: [{ type: Types.ObjectId, ref: "Reel" }],
   chats: [{ type: Types.ObjectId, ref: "Chat" }],
-  savedPosts: [{ type: Types.ObjectId, ref: 'Post' }],
-  savedReels: [{ type: Types.ObjectId, ref: 'Reel' }],
+  // savedPosts: [{ type: Types.ObjectId, ref: 'Post' }],
+  // savedReels: [{ type: Types.ObjectId, ref: 'Reel' }],
 
-  collections: [collectionSchema],
+  // collections: [collectionSchema],
 
   notifications: [{
     text: { type: String },
@@ -64,6 +64,46 @@ const userSchema = new Schema({
     data: { type: Types.ObjectId, ref: 'User' },
     redirect: { type: String },
   }],
+following: {
+  type: [{ type: Types.ObjectId, ref: 'User' }],
+  default: [],
+},
+
+followers: {
+  type: [{ type: Types.ObjectId, ref: 'User' }],
+  default: [],
+},
+
+visited: {
+  type: [{ type: Types.ObjectId, ref: 'User' }],
+  default: [],
+},
+
+posts: {
+  type: [{ type: Types.ObjectId, ref: 'Post' }],
+  default: [],
+},
+
+reels: {
+  type: [{ type: Types.ObjectId, ref: 'Reel' }],
+  default: [],
+},
+
+savedPosts: {
+  type: [{ type: Types.ObjectId, ref: 'Post' }],
+  default: [],
+},
+
+savedReels: {
+  type: [{ type: Types.ObjectId, ref: 'Reel' }],
+  default: [],
+},
+
+collections: {
+  type: [collectionSchema],
+  default: [],
+},
+
 
   socketID: String,
 

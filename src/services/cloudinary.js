@@ -1,14 +1,11 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-import dotenv from 'dotenv'
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: path.join(__dirname, '../../config/.env') })
-import cloudinary from 'cloudinary'
+import cloudinary from 'cloudinary';
+import env from '../config/env.js';
 
 cloudinary.v2.config({
-    cloud_name: process.env.cloud_name,
-    api_key: process.env.api_key,
-    api_secret: process.env.api_secret,
-    secure:true
-})
-export default cloudinary.v2
+  cloud_name: env.cloudinary.cloudName,
+  api_key: env.cloudinary.apiKey,
+  api_secret: env.cloudinary.apiSecret,
+  secure: true,
+});
+
+export default cloudinary.v2;

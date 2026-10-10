@@ -1,37 +1,91 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model, Types } from 'mongoose';
 
-let messagesSchema = new Schema({
+const messageSchema = new Schema(
+  {
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 5000,
+    },
 
-    message: { required: true, type: String },
     images: {
-        type: [String],
+      type: [String],
+      default: [],
     },
-    date: { type: String, default: new Date().toLocaleDateString("en") },
-    time: {
-        type: String, default: new Date().toLocaleTimeString("en-US", {
-            hour12: true
-        })
-    },
-    sender: {
-        type: Types.ObjectId,
-        required: true,
-        ref: "User",
-    },
-    
-    
-})
 
-const chatsSchema = new Schema({
-    userIds: [{
-        type: Types.ObjectId,
-        ref: "User"
-    }],
-    messages:[messagesSchema],
-    type: {
-        type: String,
-        enums: ["group", "chat"],
-default : 'chat'
+    sender: {
+      type: Types.ObjectId,
+      required: true,
+      ref: 'User',
     },
-})
-const chatModel = model('Chat', chatsSchema);
-export default chatModel
+
+    date: {
+      type: String,
+      default: () => new Date().toLocaleDateString('en'),
+    },
+
+    time: {
+      type: String,
+      default: () =>
+        new Date().toLocaleTimeString('en-US', {
+          hour12: true,
+        }),
+    },
+  },
+  {
+    _id: true,
+    timestamps: true,
+  }
+);
+
+const chatSchema = new Schema(
+  {
+    participantKey: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    userIds: [
+      {
+        type: Types.ObjectId,
+        ref: 'User',
+        required: true,
+      },
+    ],
+
+    messages: {
+      type: [messageSchema],
+      default: [],
+    },
+
+    type: {
+      type: String,
+      enum: ['group', 'chat'],
+      default: 'chat',
+    },
+    participantKey: {
+  type: String,
+  required: true,
+  unique: true,
+  index: true,
+},
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+
+chatSchema.index({
+  userIds: 1,
+  type: 1,
+});
+
+chatSchema.index({
+  updatedAt: -1,
+});
+
+export default model('Chat', chatSchema);
